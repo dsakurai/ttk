@@ -269,7 +269,7 @@ namespace ttk {
           // increasing order, min first
           // idVertex l = i;
           // initialize structure
-          const idVertex corLeaf = graph_.getLeaf(l);
+          const idVertex corLeaf = graph_.getLeaf(l); // CORresponding leaf
           const bool fromMin = graph_.isLeafFromMin(l);
           Propagation *localPropagation = newPropagation(corLeaf, fromMin);
           const idSuperArc newArc

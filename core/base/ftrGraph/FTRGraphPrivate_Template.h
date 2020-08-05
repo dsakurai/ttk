@@ -57,6 +57,7 @@ namespace ttk {
       Star star;
       Comp comp;
 
+      // propagate preimages
       while(!isJoin && !isSplit && !localProp->empty()) {
         localProp->nextVertex();
         const idVertex curVert = localProp->getCurVertex();
@@ -92,11 +93,12 @@ namespace ttk {
 
         visitStar(localProp, star);
 
+        // decide whether we process or ignore this vertex
         if(propagations_.hasVisitedOpposite(
              curVert, localProp) /*&& !graph_.isNode(curVert)*/) {
           bool ignoreVert = false;
           for(auto edge : star.lower) {
-            const idSuperArc tmpLowArc
+            const idSuperArc tmpLowArc // LOW_est arc?
               = dynGraph(localProp).getSubtreeArc(edge);
             if(tmpLowArc != nullSuperArc
                && !graph_.getArc(tmpLowArc).isVisible()
@@ -116,24 +118,32 @@ namespace ttk {
         }
 
 #ifndef TTK_DISABLE_FTR_LAZY
+        // no split (?)
         if(valences_.lower[curVert] < 2 && valences_.upper[curVert] < 2) {
 
           // not a local min (for local min, currentArc is already set)
           if(star.lower.size()) {
+
             // not a min nor a saddle: 1 CC below
+
+            // find the connected component
             currentArc = dynGraph(localProp).getSubtreeArc(star.lower[0]);
             if(currentArc == nullSuperArc) {
               PRINT("n-" << curVert);
               continue;
             }
             if(valences_.upper[curVert] && valences_.lower[curVert]) {
-              // not saddle neither extrema
+              // not saddle nor extrema
+              // go one up
               graph_.getArc(currentArc).visit(curVert);
             }
           }
 
           mergeIn = visit(localProp, currentArc);
 
+          ////////////////////////////////////////////
+          // Update Preimage
+          ////////////////////////////////////////////
           lazyUpdatePreimage(localProp, currentArc);
 
           // ensure we will always recover this arc from the upper neighbors
@@ -142,6 +152,7 @@ namespace ttk {
           }
         } else {
           // locally apply the lazy one the current growing arc
+          // Update the preimage graph
           for(const idEdge e : star.lower) {
             const idSuperArc a = dynGraph(localProp).getNode(e)->findRootArc();
             if(a != nullSuperArc && graph_.getArc(a).isVisible()
@@ -169,7 +180,12 @@ namespace ttk {
             }
             mergeIn = visit(localProp, currentArc);
           }
+
+          ////////////////////////////////////////////
+          // Update Preimage
+          ////////////////////////////////////////////
           updatePreimage(localProp, currentArc);
+
           comp.upper = upperComps(star.upper, localProp);
           if(comp.upper.size() > 1) {
             isSplit = true;
@@ -227,7 +243,7 @@ namespace ttk {
 
         // add upper star for futur visit
         localGrowth(localProp, star.upper);
-      } // end propagation while
+      } // end propagation (while loop)
 
       // get the corresponging critical point on which
       // the propagation has stopped (join, split, max)
