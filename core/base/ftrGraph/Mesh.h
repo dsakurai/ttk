@@ -95,7 +95,7 @@ namespace ttk {
         tri_->preprocessVertexNeighbors();
         tri_->preprocessVertexEdges();
         tri_->preprocessVertexTriangles();
-        tri_->preprocessVertexStars();
+        tri_->preprocessVertexStars(); // @todo remove this and try if the algorithm still works
         tri_->preprocessTriangleEdges();
 
         nbVerts_ = tri_->getNumberOfVertices();

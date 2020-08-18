@@ -344,6 +344,13 @@ namespace ttk {
       return 0;
     }
 
+    /**
+     * Prepare access to edges (pair of vertex IDs) and
+     * another for vertex -> edge records.
+     * In ExplicitTriangulation these are two arrays.
+     *
+     * @return
+     */
     virtual int preprocessVertexEdges() {
       preprocessEdges();
       hasPreprocessedVertexEdges_ = true;
